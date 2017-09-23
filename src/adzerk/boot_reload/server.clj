@@ -54,7 +54,12 @@
 (defn connect! [channel]
   (swap! clients conj channel)
   (http/on-close channel (fn [_] (swap! clients disj channel)))
-  (http/on-receive channel #(handle-message channel (read-string %))))
+  (http/on-receive
+   channel
+   (fn [p]
+     #_(println "channel" channel)
+     (println "(read-string p)" (read-string p))
+     (handle-message channel (read-string p)))))
 
 (defn handler [request]
   (if-not (:websocket? request)

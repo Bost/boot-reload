@@ -1,18 +1,19 @@
 (set-env!
   :resource-paths #{"src"}
   :source-paths #{"test"}
-  :dependencies '[[org.clojure/clojure "1.8.0" :scope "provided"]
-                  [http-kit "2.2.0" :scope "test"]
-                  [metosin/boot-alt-test "0.3.2" :scope "test"]])
+  :dependencies
+  '[[org.clojure/clojure "1.9.0-beta1" :scope "provided"]
+    [http-kit "2.2.0" :scope "test"]
+    [metosin/boot-alt-test "0.3.2" :scope "test"]])
 
 (require '[metosin.boot-alt-test :refer [alt-test]])
 
-(def +version+ "0.5.2")
+(def +version+ "0.5.3")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
        :version     +version+
-       :description "Boot task to automatically reload page resources in the browser."
+       :description "Boot task to auto-reload page resources in the browser."
        :url         "https://github.com/adzerk/boot-reload"
        :scm         {:url "https://github.com/adzerk/boot-reload"}
        :license     {"Eclipse Public License"

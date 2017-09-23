@@ -14,21 +14,26 @@
 ;; Thanks, lein-figwheel & lively!
 (defn patch-goog-base! []
   (set! (.-provide js/goog) (.-exportPath_ js/goog))
-  (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
-                                                       (when (.inHtmlDocument_ js/goog)
-                                                         (jsloader/load file)))))
+  (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog))
+        (fn [file]
+          (when (.inHtmlDocument_ js/goog)
+            (jsloader/load file)))))
 
 (defn resolve-url [url ws-host]
   (let [passed-uri (Uri. url)
         protocol   (.getScheme passed-uri)
         hostname   (some-> js/window .-location .-hostname)
-        host       (cond
-                     ws-host ws-host
-                     (seq hostname) hostname
-                     :else (do (js/console.warn "Both :ws-host and window.location.hostname are empty, using localhost as default."
-                                                "This might happen if you are accessing the files directly instead of over http."
-                                                "You should probably set :ws-host manually.")
-                               "localhost"))
+        host
+        (cond
+          ws-host ws-host
+          (seq hostname) hostname
+          :else
+          (do
+            (js/console.warn
+             "Both :ws-host and window.location.hostname are nil, using localhost as default."
+             "This might happen if you are accessing the files directly instead of over http."
+             "You should probably set :ws-host manually.")
+            "localhost"))
         port       (.getPort passed-uri)]
     (str protocol "://" host ":" port)))
 
@@ -54,7 +59,7 @@
 
        (event/listen conn :opened
                      (fn [evt]
-                       (.info js/console "Reload websocket connected.")))
+                       (.info js/console "Connection opened:" url)))
 
        (event/listen conn :message
                      (fn [evt]
@@ -64,10 +69,10 @@
        (event/listen conn :closed
                      (fn [evt]
                        (reset! ws-conn nil)
-                       (.info js/console "Reload websocket connection closed.")))
+                       (.info js/console "Connection closed:" url )))
 
        (event/listen conn :error
                      (fn [evt]
-                       (.error js/console "Reload websocket error:" evt)))
+                       (.error js/console "Error connecting to" url "evt" evt)))
 
        (net/connect conn (resolve-url url (:ws-host opts)))))))
